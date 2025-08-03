@@ -50,7 +50,7 @@ func getVisitorLimiter(ip string) *rate.Limiter {
 	defer visitorsMutex.Unlock()
 	limiter, exists := visitors[ip]
 	if !exists {
-		limiter = rate.NewLimiter(rate.Every(12*time.Second), 1) // 5 req/menit
+		limiter = rate.NewLimiter(rate.Every(1*time.Second), 1) // 60 req/menit
 		visitors[ip] = limiter
 	}
 	return limiter
