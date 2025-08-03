@@ -2,14 +2,14 @@ version: '3.8'
 
 services:
   grpc-service:
-    build: ./ws-grpc-service
+    build: ./gag-listener
     restart: always
     container_name: grpc-service
     volumes:
       - ./logs:/app/logs
 
   api-gateway:
-    build: ./rest-api-gateway
+    build: ./gag-rest-api-gateway
     restart: always
     container_name: api-gateway
     ports:
@@ -20,7 +20,7 @@ services:
       - grpc-service
 
   discord-bot:
-    build: ./discord-bot
+    build: ./gag-discord-bot
     restart: always
     container_name: discord-bot
     env_file:
