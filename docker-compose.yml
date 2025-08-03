@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  grpc-service:
+    build: ./ws-grpc-service
+    restart: always
+    container_name: grpc-service
+    volumes:
+      - ./logs:/app/logs
+
+  api-gateway:
+    build: ./rest-api-gateway
+    restart: always
+    container_name: api-gateway
+    ports:
+      - "${API_PORT:-8080}:8080"
+    volumes:
+      - ./logs:/app/logs
+    depends_on:
+      - grpc-service
+
+  discord-bot:
+    build: ./discord-bot
+    restart: always
+    container_name: discord-bot
+    env_file:
+      - .env
+    volumes:
+      - ./logs:/app/logs
+    depends_on:
+      - grpc-service
+
+volumes:
+  logs:
+    driver: local

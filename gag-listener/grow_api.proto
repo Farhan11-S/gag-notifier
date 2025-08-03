@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+package grow_api;
+
+option go_package = "./grow_api";
+
+import "google/protobuf/struct.proto";
+import "google/protobuf/empty.proto";
+
+// Service utama kita
+service GrowAPIService {
+  rpc GetAllData(google.protobuf.Empty) returns (AllDataResponse);
+  rpc GetGear(google.protobuf.Empty) returns (StockResponse);
+  rpc GetSeeds(google.protobuf.Empty) returns (StockResponse);
+  rpc GetCosmetics(google.protobuf.Empty) returns (StockResponse);
+  rpc GetEventShop(google.protobuf.Empty) returns (StockResponse);
+  rpc GetEggs(google.protobuf.Empty) returns (EggResponse);
+  rpc GetWeather(google.protobuf.Empty) returns (WeatherResponse);
+  rpc SubscribeToRareItemNotifications(google.protobuf.Empty)
+      returns (stream RareItemNotification);
+}
+
+// Message untuk item standar (gear, seeds, dll.)
+message Item {
+  string name = 1;
+  double quantity = 2;
+}
+
+// Message untuk respons yang berisi list of items
+message StockResponse { repeated Item items = 1; }
+
+// Message untuk respons telur
+message EggResponse { repeated Item eggs = 1; }
+
+// Message untuk respons cuaca (menggunakan Struct untuk data dinamis)
+message WeatherResponse { google.protobuf.Struct weather = 1; }
+
+// Message untuk respons /alldata
+message AllDataResponse {
+  google.protobuf.Struct weather = 1;
+  repeated Item gear = 2;
+  repeated Item seeds = 3;
+  repeated Item eggs = 4;
+  repeated Item honey = 5; // Untuk eventshop
+  repeated Item cosmetics = 6;
+  int64 timestamp = 7;
+}
+
+message RareItemNotification {
+  string item_name = 1;
+  double quantity = 2;
+  int64 timestamp = 3;
+  string category = 4; // "seeds", "gear", atau "eggs"
+}
