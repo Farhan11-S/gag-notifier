@@ -280,7 +280,7 @@ func sendErrorResponse(s *discordgo.Session, i *discordgo.InteractionCreate, mes
 }
 
 func cleanupExpiredCache() {
-	ticker := time.NewTicker(5 * time.Minute) // Setiap 5 menit
+	ticker := time.NewTicker(20 * time.Minute)
 	defer ticker.Stop()
 
 	for range ticker.C {
