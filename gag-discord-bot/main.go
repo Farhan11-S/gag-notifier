@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
 	"time"
 
@@ -24,6 +25,9 @@ var (
 	channelID  string // Diperlukan untuk notifikasi benih langka
 	grpcClient pb.GrowAPIServiceClient
 	dg         *discordgo.Session
+
+	notificationCache      = make(map[string]time.Time)
+	notificationCacheMutex = &sync.Mutex{}
 )
 
 // Daftar slash command
@@ -114,6 +118,7 @@ func main() {
 
 	// Jalankan subscriber notifikasi di goroutine terpisah SETELAH koneksi terbuka.
 	go subscribeToNotifications()
+	go cleanupExpiredCache()
 
 	// Tunggu sinyal keluar (Ctrl+C).
 	log.Println("Bot sedang berjalan. Tekan CTRL+C untuk keluar.")
@@ -176,6 +181,20 @@ func subscribeToNotifications() {
 }
 
 func sendNotificationMessage(notif *pb.RareItemNotification) {
+	notificationCacheMutex.Lock()
+
+	cooldown := 5 * time.Minute // Cooldown 5 menit untuk setiap item
+	if lastSent, found := notificationCache[notif.GetItemName()]; found && time.Since(lastSent) < cooldown {
+		notificationCacheMutex.Unlock()
+		log.Printf("Notifikasi untuk '%s' diabaikan (masih dalam masa cooldown).", notif.GetItemName())
+		return // Abaikan notifikasi
+	}
+
+	notificationCache[notif.GetItemName()] = time.Now()
+	notificationCacheMutex.Unlock()
+
+	log.Printf("Mengirim notifikasi baru untuk '%s' ke Discord.", notif.GetItemName())
+
 	var title string
 	var color int
 
@@ -258,4 +277,21 @@ func formatItemsToEmbed(title string, items []*pb.Item, color int) *discordgo.Me
 
 func sendErrorResponse(s *discordgo.Session, i *discordgo.InteractionCreate, message string) {
 	s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{Content: &message})
+}
+
+func cleanupExpiredCache() {
+	ticker := time.NewTicker(5 * time.Minute) // Setiap 5 menit
+	defer ticker.Stop()
+
+	for range ticker.C {
+		notificationCacheMutex.Lock()
+		log.Println("Membersihkan cache notifikasi yang sudah lama...")
+		for itemName, lastSent := range notificationCache {
+			// Hapus entri yang lebih lama dari 24 jam
+			if time.Since(lastSent) > 24*time.Hour {
+				delete(notificationCache, itemName)
+			}
+		}
+		notificationCacheMutex.Unlock()
+	}
 }
