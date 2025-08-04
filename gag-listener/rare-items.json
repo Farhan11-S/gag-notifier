@@ -7,13 +7,15 @@
         "Ember Lily",
         "Beanstalk",
         "Cacao",
-        "Pepper",
         "Mushroom",
-        "Grape",
-        "Mango",
-        "Dragon Fruit"
+        "Bamboo"
     ],
-    "gear": [],
+    "gear": [
+        "Advanced Sprinkler",
+        "Godly Sprinkler",
+        "Master Sprinkler",
+        "Grandmaster Sprinkler"
+    ],
     "cosmetics": [],
     "eggs": [
         "Rare Summer Egg",

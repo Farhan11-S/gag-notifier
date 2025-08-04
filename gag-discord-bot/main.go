@@ -200,28 +200,28 @@ func sendNotificationMessage(notif *pb.RareItemNotification) {
 
 	switch notif.GetCategory() {
 	case "seeds":
-		title = "🚨 Notifikasi Benih Langka! 🚨"
+		title = "🚨 Benih Langka! 🚨"
 		color = 0xffd700 // Emas
 	case "gear":
-		title = "✨ Notifikasi Gear Langka! ✨"
+		title = "✨ Gear Langka! ✨"
 		color = 0x3498db // Biru
 	case "eggs":
-		title = "🥚 Notifikasi Telur Langka! 🥚"
+		title = "🥚 Telur Langka! 🥚"
 		color = 0x9b59b6 // Ungu
 	default:
-		title = "🔔 Notifikasi Item Langka! 🔔"
+		title = "🔔 Item Langka! 🔔"
 		color = 0x95a5a6 // Abu-abu
 	}
 
 	embed := &discordgo.MessageEmbed{
 		Title:       title,
-		Description: fmt.Sprintf("**%s** sekarang tersedia di toko!", notif.GetItemName()),
+		Description: fmt.Sprintf("**%s**: %d", notif.GetItemName(), int(notif.GetQuantity())),
 		Color:       color,
-		Fields: []*discordgo.MessageEmbedField{
-			{Name: "Jumlah", Value: fmt.Sprintf("%d", int(notif.GetQuantity())), Inline: true},
-		},
+		// Fields: []*discordgo.MessageEmbedField{
+		// 	{Name: "Jumlah", Value: fmt.Sprintf("%d", int(notif.GetQuantity())), Inline: true},
+		// },
 		Timestamp: time.Unix(notif.GetTimestamp(), 0).Format(time.RFC3339),
-		Footer:    &discordgo.MessageEmbedFooter{Text: "Rare Item Notifier"},
+		// Footer:    &discordgo.MessageEmbedFooter{Text: "Rare Item Notifier"},
 	}
 
 	_, err := dg.ChannelMessageSendEmbed(channelID, embed)
